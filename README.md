@@ -8,5 +8,16 @@ We apply rule-based text cleaning to all texts obtained. Then, we filter out seg
 
 __Required libraries:__
 
-- TensorFlow v2.x (__tensorflow__)
-- TensorFlow Text (__tensorflow_text__)
+- [TensorFlow 2.x](https://github.com/tensorflow) (__tensorflow__)
+- [TensorFlow Text](https://github.com/tensorflow/text) (__tensorflow_text__)
+- [TensorFlow Hub](https://github.com/tensorflow/hub) (__tensorflow_hub__)
+- [dask](https://github.com/dask/dask)
+
+
+The following libraries can be install via `pip` as follows.
+
+```bash
+pip install -r requirements.txt
+```
+
+
