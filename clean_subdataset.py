@@ -135,7 +135,7 @@ def main(args):
             lambda x: th_normalize(x), meta=('th_text', 'str')).compute()
 
     if args.fix_html:
-        # from pythainlp.ulmfit.fix_html
+
         print('\n[Text cleaning] Perform fixing HTML special characters.')
         df_dd['en_text'] = df_dd['en_text'].apply(lambda x: html.unescape(
             x).replace('& # 34;', '"'), meta=('en_text', 'str')).compute()
