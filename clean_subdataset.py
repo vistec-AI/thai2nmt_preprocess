@@ -31,7 +31,8 @@ dask.config.set(scheduler='processes')
 word_tokenize_no_space = partial(word_tokenize, keep_whitespace=False)
 word_tokenize_space = partial(word_tokenize, keep_whitespace=True)
 
-USE_MODEL_NAME = os.getenv('USE_MODEL') or 'universal-sentence-encoder-multilingual/3'
+USE_MODEL_NAME = os.getenv(
+    'USE_MODEL') or 'universal-sentence-encoder-multilingual/3'
 
 
 def char_percent(pattern, text):
@@ -67,21 +68,22 @@ def get_similar_score(lang1, lang2, batch_size, embed):
 
 
 def main(args):
+    if args.input_path == '':
+        raise "Positional argument: `input_path` is not specified"
 
     input_path = args.input_path
     input_file_name = Path(args.input_path).stem
     input_file_ext = Path(args.input_path).suffix
 
     if input_file_ext == '.csv':
-        print(f'Loading CSV file from `{input_path}`...')
+        print(f'Loading CSV file from {input_path}')
         df = pd.read_csv(input_path, index_col=[])
-
     elif input_file_ext == '.tsv':
-        print(f'Loading TSV file from `{input_path}`...')
+        print(f'Loading TSV file from {input_path}')
         df = pd.read_csv(input_path, sep='\t', index_col=[])
 
     elif input_file_ext == '.json':
-        print(f'Loading JSON file from `{input_path}`...')
+        print(f'Loading JSON file from {input_path}')
 
         objs_list = json.load(open(input_path))
         objs_list = sum(objs_list, [])
@@ -104,7 +106,7 @@ def main(args):
 
         df = pd.DataFrame(dataset)
     else:
-        raise "Invalida file extension"
+        raise "Invalid file extension"
 
     print(f'filename: {input_file_name} (from: {input_path})')
     print(f'Current number of sentence pairs: {df.shape[0]:8,}\n')
@@ -171,18 +173,15 @@ def main(args):
             f' en duplicates: {df.en_text.count() - df.en_text.nunique():6,} segments')
         print(
             f' th duplicates: {df.th_text.count() - df.th_text.nunique():6,} segments')
-        
+
         en_th_nuniq = df.groupby(['en_text', 'th_text']).ngroups
         print(f' en,th duplicates: {df.shape[0] - en_th_nuniq:6,} segments')
-        
-        
+
         df_dd = df_dd.drop_duplicates(
             subset=['th_text', 'en_text'], keep='first').reset_index(drop=True)
 
         print(
             f'\n Remaining number of sentence pairs: {len(df_dd.index):8,} (remove {temp_len - len(df_dd.index):6,} rows)')
-
-        
 
     df = df_dd.compute()
 
@@ -251,7 +250,7 @@ def main(args):
         print(
             f'\n[Filtering] Perform dropping rows that character percentage of En characters less than {args.en_char_per:2f}:\n')
         temp_len = df.shape[0]
-        df = df[(df.per_en > args.en_char_per)].reset_index(drop=True)
+        df = df[(df.per_en >= args.en_char_per)].reset_index(drop=True)
         print(
             f' Remaining number of sentence pairs: {df.shape[0]:8,} (remove {temp_len - df.shape[0]:5,} rows)')
 
@@ -259,7 +258,7 @@ def main(args):
         print(
             f'\n[Filtering] Perform dropping rows that character perfoence of Th characters less than {args.th_char_per:2f}:\n')
         temp_len = df.shape[0]
-        df = df[(df.per_th > args.th_char_per)
+        df = df[(df.per_th >= args.th_char_per)
                 ].reset_index().reset_index(drop=True)
         print(
             f' Remaining number of sentence pairs: {df.shape[0]:8,} (remove {temp_len - df.shape[0]:5,} rows)')
@@ -344,7 +343,7 @@ def main(args):
             print('')
             print('-'*25)
             print('\n')
-        
+
         # Python input as float
         if args.use_sim_threshold is None:
             print(
@@ -366,7 +365,6 @@ def main(args):
         print(
             f'\n Remaining number of sentence pairs: {df.shape[0]:8,} (remove {temp_len - df.shape[0]:5,} rows)')
 
-    
     print('\n\n')
     print('-'*35)
     print(f'\n Total number of sentence pairs: {df.shape[0]:8,}')
@@ -390,40 +388,40 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('input_path')
-    parser.add_argument('--drop_dup', action='store_true')
-    parser.add_argument('--drop_na', action='store_true')
-    parser.add_argument('--fix_html', action='store_true')
-    parser.add_argument('--th_norm', action='store_true')
-    parser.add_argument('--rm_useless_spaces', action='store_true')
-    parser.add_argument('--drop_th_in_en', action='store_true')
-    parser.add_argument('--drop_by_en_tok_count', action='store_true')
-    parser.add_argument('--drop_by_th_tok_count', action='store_true')
+    parser.add_argument('input_path', help="Path to the En-Th segment pairs sub-dataset.")
+    parser.add_argument('--drop_dup', action='store_true', help="Drop duplicated segment pairs")
+    parser.add_argument('--drop_na', action='store_true', help="Drop rows with NA")
+    parser.add_argument('--fix_html', action='store_true', help="Format HTML special characters"))
+    parser.add_argument('--th_norm', action = 'store_true', help = "Perform Thai text normalization according to pythainlp.utils.normailize"))
+    parser.add_argument('--rm_useless_spaces', action='store_true', help='Remove redundant spces')
+    parser.add_argument('--drop_th_in_en', action='store_true', help='Drop rows where Thai chacters found in English segment')
+    parser.add_argument('--drop_by_en_tok_count', action='store_true', help='Drop rows based on #tokens of English segment')
+    parser.add_argument('--drop_by_th_tok_count', action='store_true', help='Drop rows based on #tokens of Thaisegment')
 
-    parser.add_argument('--drop_by_en_char_per', action='store_true')
-    parser.add_argument('--drop_by_th_char_per', action='store_true')
-    parser.add_argument('--drop_by_use_sim', action='store_true')
+    parser.add_argument('--drop_by_en_char_per', action='store_true', help='Drop rows based on percentage of English characters')
+    parser.add_argument('--drop_by_th_char_per', action='store_true', help='Drop rows based on percentage of Thai characters')
+    parser.add_argument('--drop_by_use_sim', action='store_true', help='Use Universal Sentence Encoder (USE) Multiligual model to filter pairs of English-Thai segment')
 
-    parser.add_argument('--drop_by_th2en_ratio', action='store_true')
-    parser.add_argument('--th2en_ratio_min', type=float, default=0.0)
-    parser.add_argument('--th2en_ratio_max', type=float, default=0.0)
+    parser.add_argument('--drop_by_th2en_ratio', action='store_true', help='Drop rows based on ratio of Thai to English tokens.')
+    parser.add_argument('--th2en_ratio_min', type=float, default=0.0, help='Lower bound of the Thai to English tokens ratio.')
+    parser.add_argument('--th2en_ratio_max', type=float, default=0.0, help='Upper bound of the Thai to English tokens ratio.')
 
-    parser.add_argument('--en_char_per', type=float, default=0.0)
-    parser.add_argument('--th_char_per', type=float, default=0.0)
-    parser.add_argument('--en_tok_min', type=int, default=0)
-    parser.add_argument('--en_tok_max', type=int, default=500)
-    parser.add_argument('--th_tok_min', type=int, default=0)
-    parser.add_argument('--th_tok_max', type=int, default=500)
+    parser.add_argument('--en_char_per', type=float, default=0.0, help='Lower bound of the English character percentage in segment.')
+    parser.add_argument('--th_char_per', type=float, default=0.0, help='Upper bound of the Thai character percentage in segment.')
+    parser.add_argument('--en_tok_min', type=int, default=0, help='Lower bound of the English tokens in segment.')
+    parser.add_argument('--en_tok_max', type=int, default=500, help='Upper bound of the English tokens in segment.')
+    parser.add_argument('--th_tok_min', type=int, default=0, help='Lower bound of the Thai tokens in segment.')
+    parser.add_argument('--th_tok_max', type=int, default=500, help='Upper bound of the Thai tokens in segment.')
 
-    parser.add_argument('--out_dir', type=str, default='./mt_cleaned_data')
+    parser.add_argument('--out_dir', type=str, default='./cleaned_dataset', help='Drectory to store the cleaned and filtered sub-dataset')
 
     parser.add_argument('--unicode_norm', type=str, default='none',
                         help='Unicode normalization including [none, nfkc, nfd, nfc, nfkd]')
 
-    parser.add_argument('--use_sim_threshold', type=float, default=None)
+    parser.add_argument('--use_sim_threshold', type=float, default=None, help='The threashold of segment pairs similarity to accept (Can be specified interactively)'))
 
-    parser.add_argument("--batch_size", default=2048, type=int)
+    parser.add_argument("--batch_size", default=2048, type=int, , help='Batch size for USE Multilingail model inference.')
 
-    args = parser.parse_args()
+    args=parser.parse_args()
 
     main(args)
