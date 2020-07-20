@@ -8,6 +8,7 @@ import unicodedata
 
 from pathlib import Path
 from functools import partial
+from typing import Pattern
 
 import numpy as np
 import pandas as pd
@@ -35,11 +36,11 @@ USE_MODEL_NAME = os.getenv(
     'USE_MODEL') or 'universal-sentence-encoder-multilingual/3'
 
 
-def char_percent(pattern, text):
+def char_percent(pattern: Pattern, text: str):
     return len(re.findall(pattern, text)) / (len(text)+0.01)
 
 
-def get_similar_score(lang1, lang2, batch_size, embed):
+def get_similar_score(lang1: str, lang2: str, batch_size: int, embed):
 
     scores = []
 
@@ -378,7 +379,7 @@ def main(args):
             args.out_dir, f'{input_file_name}.cleaned.csv')
     print(f'\nBegin writing result file to `{output_path}`')
 
-    df[['en_text','th_text']].to_csv(output_path, encoding='utf-8')
+    df[['en_text', 'th_text']].to_csv(output_path, encoding='utf-8')
 
     print('Done.')
     print('')
@@ -388,40 +389,64 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('input_path', help="Path to the En-Th segment pairs sub-dataset.")
-    parser.add_argument('--drop_dup', action='store_true', help="Drop duplicated segment pairs")
-    parser.add_argument('--drop_na', action='store_true', help="Drop rows with NA")
-    parser.add_argument('--fix_html', action='store_true', help="Format HTML special characters")
-    parser.add_argument('--th_norm', action = 'store_true', help = "Perform Thai text normalization according to pythainlp.utils.normailize")
-    parser.add_argument('--rm_useless_spaces', action='store_true', help='Remove redundant spces')
-    parser.add_argument('--drop_th_in_en', action='store_true', help='Drop rows where Thai chacters found in English segment')
-    parser.add_argument('--drop_by_en_tok_count', action='store_true', help='Drop rows based on #tokens of English segment')
-    parser.add_argument('--drop_by_th_tok_count', action='store_true', help='Drop rows based on #tokens of Thaisegment')
+    parser.add_argument(
+        'input_path', help="Path to the En-Th segment pairs sub-dataset.")
+    parser.add_argument('--drop_dup', action='store_true',
+                        help="Drop duplicated segment pairs")
+    parser.add_argument('--drop_na', action='store_true',
+                        help="Drop rows with NA")
+    parser.add_argument('--fix_html', action='store_true',
+                        help="Format HTML special characters")
+    parser.add_argument('--th_norm', action='store_true',
+                        help="Perform Thai text normalization according to pythainlp.utils.normailize")
+    parser.add_argument('--rm_useless_spaces',
+                        action='store_true', help='Remove redundant spces')
+    parser.add_argument('--drop_th_in_en', action='store_true',
+                        help='Drop rows where Thai chacters found in English segment')
+    parser.add_argument('--drop_by_en_tok_count', action='store_true',
+                        help='Drop rows based on #tokens of English segment')
+    parser.add_argument('--drop_by_th_tok_count', action='store_true',
+                        help='Drop rows based on #tokens of Thaisegment')
 
-    parser.add_argument('--drop_by_en_char_per', action='store_true', help='Drop rows based on percentage of English characters')
-    parser.add_argument('--drop_by_th_char_per', action='store_true', help='Drop rows based on percentage of Thai characters')
-    parser.add_argument('--drop_by_use_sim', action='store_true', help='Use Universal Sentence Encoder (USE) Multiligual model to filter pairs of English-Thai segment')
+    parser.add_argument('--drop_by_en_char_per', action='store_true',
+                        help='Drop rows based on percentage of English characters')
+    parser.add_argument('--drop_by_th_char_per', action='store_true',
+                        help='Drop rows based on percentage of Thai characters')
+    parser.add_argument('--drop_by_use_sim', action='store_true',
+                        help='Use Universal Sentence Encoder (USE) Multiligual model to filter pairs of English-Thai segment')
 
-    parser.add_argument('--drop_by_th2en_ratio', action='store_true', help='Drop rows based on ratio of Thai to English tokens.')
-    parser.add_argument('--th2en_ratio_min', type=float, default=0.0, help='Lower bound of the Thai to English tokens ratio.')
-    parser.add_argument('--th2en_ratio_max', type=float, default=15.0, help='Upper bound of the Thai to English tokens ratio.')
+    parser.add_argument('--drop_by_th2en_ratio', action='store_true',
+                        help='Drop rows based on ratio of Thai to English tokens.')
+    parser.add_argument('--th2en_ratio_min', type=float, default=0.0,
+                        help='Lower bound of the Thai to English tokens ratio.')
+    parser.add_argument('--th2en_ratio_max', type=float, default=15.0,
+                        help='Upper bound of the Thai to English tokens ratio.')
 
-    parser.add_argument('--en_char_per', type=float, default=0.0, help='Lower bound of the English character percentage in segment.')
-    parser.add_argument('--th_char_per', type=float, default=0.0, help='Upper bound of the Thai character percentage in segment.')
-    parser.add_argument('--en_tok_min', type=int, default=0, help='Lower bound of the English tokens in segment.')
-    parser.add_argument('--en_tok_max', type=int, default=500, help='Upper bound of the English tokens in segment.')
-    parser.add_argument('--th_tok_min', type=int, default=0, help='Lower bound of the Thai tokens in segment.')
-    parser.add_argument('--th_tok_max', type=int, default=500, help='Upper bound of the Thai tokens in segment.')
+    parser.add_argument('--en_char_per', type=float, default=0.0,
+                        help='Lower bound of the English character percentage in segment.')
+    parser.add_argument('--th_char_per', type=float, default=0.0,
+                        help='Upper bound of the Thai character percentage in segment.')
+    parser.add_argument('--en_tok_min', type=int, default=0,
+                        help='Lower bound of the English tokens in segment.')
+    parser.add_argument('--en_tok_max', type=int, default=500,
+                        help='Upper bound of the English tokens in segment.')
+    parser.add_argument('--th_tok_min', type=int, default=0,
+                        help='Lower bound of the Thai tokens in segment.')
+    parser.add_argument('--th_tok_max', type=int, default=500,
+                        help='Upper bound of the Thai tokens in segment.')
 
-    parser.add_argument('--out_dir', type=str, default='./cleaned_dataset', help='Drectory to store the cleaned and filtered sub-dataset')
+    parser.add_argument('--out_dir', type=str, default='./cleaned_dataset',
+                        help='Drectory to store the cleaned and filtered sub-dataset')
 
     parser.add_argument('--unicode_norm', type=str, default='none',
                         help='Unicode normalization including [none, nfkc, nfd, nfc, nfkd]')
 
-    parser.add_argument('--use_sim_threshold', type=float, default=None, help='The threashold of segment pairs similarity to accept (Can be specified interactively)')
+    parser.add_argument('--use_sim_threshold', type=float, default=None,
+                        help='The threashold of segment pairs similarity to accept (Can be specified interactively)')
 
-    parser.add_argument("--batch_size", default=2048, type=int, help='Batch size for USE Multilingail model inference.')
+    parser.add_argument("--batch_size", default=2048, type=int,
+                        help='Batch size for USE Multilingail model inference.')
 
-    args=parser.parse_args()
+    args = parser.parse_args()
 
     main(args)
