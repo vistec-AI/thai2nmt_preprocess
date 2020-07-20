@@ -378,7 +378,7 @@ def main(args):
             args.out_dir, f'{input_file_name}.cleaned.csv')
     print(f'\nBegin writing result file to `{output_path}`')
 
-    df.to_csv(output_path, encoding='utf-8')
+    df[['en_text','th_text']].to_csv(output_path, encoding='utf-8')
 
     print('Done.')
     print('')
