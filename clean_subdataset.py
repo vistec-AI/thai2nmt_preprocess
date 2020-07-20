@@ -391,8 +391,8 @@ if __name__ == '__main__':
     parser.add_argument('input_path', help="Path to the En-Th segment pairs sub-dataset.")
     parser.add_argument('--drop_dup', action='store_true', help="Drop duplicated segment pairs")
     parser.add_argument('--drop_na', action='store_true', help="Drop rows with NA")
-    parser.add_argument('--fix_html', action='store_true', help="Format HTML special characters"))
-    parser.add_argument('--th_norm', action = 'store_true', help = "Perform Thai text normalization according to pythainlp.utils.normailize"))
+    parser.add_argument('--fix_html', action='store_true', help="Format HTML special characters")
+    parser.add_argument('--th_norm', action = 'store_true', help = "Perform Thai text normalization according to pythainlp.utils.normailize")
     parser.add_argument('--rm_useless_spaces', action='store_true', help='Remove redundant spces')
     parser.add_argument('--drop_th_in_en', action='store_true', help='Drop rows where Thai chacters found in English segment')
     parser.add_argument('--drop_by_en_tok_count', action='store_true', help='Drop rows based on #tokens of English segment')
@@ -404,7 +404,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--drop_by_th2en_ratio', action='store_true', help='Drop rows based on ratio of Thai to English tokens.')
     parser.add_argument('--th2en_ratio_min', type=float, default=0.0, help='Lower bound of the Thai to English tokens ratio.')
-    parser.add_argument('--th2en_ratio_max', type=float, default=0.0, help='Upper bound of the Thai to English tokens ratio.')
+    parser.add_argument('--th2en_ratio_max', type=float, default=15.0, help='Upper bound of the Thai to English tokens ratio.')
 
     parser.add_argument('--en_char_per', type=float, default=0.0, help='Lower bound of the English character percentage in segment.')
     parser.add_argument('--th_char_per', type=float, default=0.0, help='Upper bound of the Thai character percentage in segment.')
@@ -418,9 +418,9 @@ if __name__ == '__main__':
     parser.add_argument('--unicode_norm', type=str, default='none',
                         help='Unicode normalization including [none, nfkc, nfd, nfc, nfkd]')
 
-    parser.add_argument('--use_sim_threshold', type=float, default=None, help='The threashold of segment pairs similarity to accept (Can be specified interactively)'))
+    parser.add_argument('--use_sim_threshold', type=float, default=None, help='The threashold of segment pairs similarity to accept (Can be specified interactively)')
 
-    parser.add_argument("--batch_size", default=2048, type=int, , help='Batch size for USE Multilingail model inference.')
+    parser.add_argument("--batch_size", default=2048, type=int, help='Batch size for USE Multilingail model inference.')
 
     args=parser.parse_args()
 
