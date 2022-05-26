@@ -1,4 +1,4 @@
 tensorflow_text==2.1.1
 tensorflow_hub==0.7.0
-tensorflow==2.1.0
+tensorflow==2.7.2
 dask==2.14.0
